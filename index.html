@@ -1065,6 +1065,7 @@ const firebaseConfig = {
 
   // ========== ADDON PRICES ==========
   const addonPrices = {
+    'Line Up': 500,
     'Line Up & Shave': 1500,
     'Eyebrows Shave': 1000,
     'Eyebrow Wax': 1500,
@@ -1073,7 +1074,6 @@ const firebaseConfig = {
     'Clusters': 4500,
     'Strip': 2500,
     'Custom Design': 500,
-    'Line Up': 500,
   };
 
   // Per-cut price overrides: used when a specific cut changes the base price
@@ -1213,13 +1213,15 @@ const firebaseConfig = {
     });
   });
 
-  function buildPricingCard(headerHTML, sections) {
+  function buildPricingCard(headerHTML, sections, basePrice) {
     // sections = [{title, items:[{name,price,isAddon}], isMutex}]
+    const priceTag = basePrice ? `<div style="margin:10px 0 6px;text-align:center;"><span style="display:inline-block;background:var(--accent);color:#1a1a1a;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;padding:6px 22px;border-radius:6px;">CUT PRICE: $${Number(basePrice).toLocaleString()}</span></div>` : '';
     let html = `<div style="background:var(--accent);padding:10px 14px;">
       <span style="font-family:'Bebas Neue',cursive;letter-spacing:2px;font-size:14px;color:#1a1a1a;">${headerHTML}</span>
     </div>
     <div style="padding:8px 12px 10px;">
-      <div class="tap-hint">👆 Tap items below to select what you want</div>`;
+      ${priceTag}
+      <div class="tap-hint">👆 Tap add-ons below to include them</div>`;
     sections.forEach(sec => {
       if (sec.title) html += `<div class="card-section-title">${sec.title}</div>`;
       sec.items.forEach(it => { html += buildCutRow(it.name, it.price, it.isAddon); });
@@ -1234,6 +1236,7 @@ const firebaseConfig = {
   (function() {
     const adultCuts = ['All Round Fade','Taper Fade','One Level','Bald Cut','Mohawk','Flat Top','Big Chop','Buzz Cut','Low Fade','Skin Fade','Ladies Cut'];
     const adultAddons = [
+      {name:'Line Up',price:'$500'},
       {name:'Line Up & Shave',price:'$1,500'},
       {name:'Eyebrows Shave',price:'$1,000'},
       {name:'Eyebrow Wax',price:'$1,500'},
@@ -1249,7 +1252,7 @@ const firebaseConfig = {
         basePrice: 2500,
         html: () => buildPricingCard('💈 ADULT 18+ — ' + cut.toUpperCase() + ' &nbsp;|&nbsp; $2,500', [
           { title: 'Add-Ons (pick any):', items: adultAddons.map(a => ({...a, isAddon:true})) }
-        ])
+        ], 2500)
       };
     });
   })();
@@ -1258,6 +1261,7 @@ const firebaseConfig = {
   (function() {
     const teenCuts = ['All Round Fade','Taper Fade','One Level','Bald Cut','Mohawk','Flat Top','Big Chop','Buzz Cut','Low Fade','Skin Fade','Ladies Cut'];
     const teenAddons = [
+      {name:'Line Up',price:'$500'},
       {name:'Eyebrows Shave',price:'$1,000'},
       {name:'Eyebrow Wax',price:'$1,500'},
       {name:'Tint Eyebrows',price:'$1,000'},
@@ -1272,7 +1276,7 @@ const firebaseConfig = {
         basePrice: 2000,
         html: () => buildPricingCard('✂ TEEN 13–17 — ' + cut.toUpperCase() + ' &nbsp;|&nbsp; $2,000', [
           { title: 'Add-Ons (pick any):', items: teenAddons.map(a => ({...a, isAddon:true})) }
-        ])
+        ], 2000)
       };
     });
   })();
@@ -1290,7 +1294,7 @@ const firebaseConfig = {
         basePrice: 1500,
         html: () => buildPricingCard('👦 KIDS — ' + cut.toUpperCase() + ' &nbsp;|&nbsp; $1,500', [
           { title: 'Optional Extra (pick any):', items: kidsAddons.map(a => ({...a, isAddon:true})) }
-        ])
+        ], 1500)
       };
     });
   })();
