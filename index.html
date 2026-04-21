@@ -51,8 +51,8 @@
   "priceRange": "$$",
   "address": {
     "@type": "PostalAddress",
-    "streetAddress": "Shop 24, Pavilion Mall",
-    "addressLocality": "Half Way Tree",
+    "streetAddress": "6 South Ave, Dragon Court Centre Plaza",
+    "addressLocality": "Kingston",
     "addressCountry": "JM"
   },
   "sameAs": []
@@ -512,7 +512,7 @@
 
   <div class="location-info">
     <h3>LOCATION:</h3>
-    <p>Shop 24, Pavilion Mall, Half way tree Jamaica</p>
+    <p>📍 6 South Ave, Dragon Court Centre Plaza, Kingston</p>
   </div>
 
   <div class="separator-line"></div>
@@ -590,31 +590,56 @@
 
     <!-- Adult: service picker -->
     <div id="adultServiceWrap" style="display:none;">
-      <label for="adultService">Adult Service:</label>
+      <label for="adultService">Adult Cut:</label>
       <select id="adultService" onchange="onServiceChange();">
-        <option value="NONE">— Select a service —</option>
-        <option value="Celebrity Premium Cut">⭐ Celebrity Premium Cut — $3,500</option>
-        <option value="Celebrity Regular Cut">✂ Celebrity Regular Cut — $3,000</option>
+        <option value="NONE">— Choose Your Cut —</option>
+        <option value="adult-All Round Fade">All Round Fade — $2,500</option>
+        <option value="adult-Taper Fade">Taper Fade — $2,500</option>
+        <option value="adult-One Level">One Level — $2,500</option>
+        <option value="adult-Bald Cut">Bald Cut — $2,500</option>
+        <option value="adult-Mohawk">Mohawk — $2,500</option>
+        <option value="adult-Flat Top">Flat Top — $2,500</option>
+        <option value="adult-Big Chop">Big Chop — $2,500</option>
+        <option value="adult-Buzz Cut">Buzz Cut — $2,500</option>
+        <option value="adult-Low Fade">Low Fade — $2,500</option>
+        <option value="adult-Skin Fade">Skin Fade — $2,500</option>
+        <option value="adult-Ladies Cut">Ladies Cut — $2,500</option>
       </select>
     </div>
 
     <!-- Teen: service picker -->
     <div id="teenServiceWrap" style="display:none;">
-      <label for="teenService">Teen Service:</label>
+      <label for="teenService">Teen Cut:</label>
       <select id="teenService" onchange="onServiceChange();">
-        <option value="NONE">— Select a service —</option>
-        <option value="Teenage Premium Cut">⭐ Celebrity Premium Cut — $2,500</option>
-        <option value="Teenage Regular Cut">✂ Celebrity Regular Cut — $2,000</option>
+        <option value="NONE">— Choose Your Cut —</option>
+        <option value="teen-All Round Fade">All Round Fade — $2,000</option>
+        <option value="teen-Taper Fade">Taper Fade — $2,000</option>
+        <option value="teen-One Level">One Level — $2,000</option>
+        <option value="teen-Bald Cut">Bald Cut — $2,000</option>
+        <option value="teen-Mohawk">Mohawk — $2,000</option>
+        <option value="teen-Flat Top">Flat Top — $2,000</option>
+        <option value="teen-Big Chop">Big Chop — $2,000</option>
+        <option value="teen-Buzz Cut">Buzz Cut — $2,000</option>
+        <option value="teen-Low Fade">Low Fade — $2,000</option>
+        <option value="teen-Skin Fade">Skin Fade — $2,000</option>
+        <option value="teen-Ladies Cut">Ladies Cut — $2,000</option>
       </select>
     </div>
 
     <!-- Kids: service picker -->
     <div id="kidsServiceWrap" style="display:none;">
-      <label for="kidsService">Kids Service:</label>
+      <label for="kidsService">Kids Cut:</label>
       <select id="kidsService" onchange="onServiceChange();">
-        <option value="NONE">— Select a service —</option>
-        <option value="Kids Premium Cut">⭐ Celebrity Premium Cut — $2,000</option>
-        <option value="Kids Regular Cut">✂ Celebrity Regular Cut — $1,500</option>
+        <option value="NONE">— Choose Your Cut —</option>
+        <option value="kids-All Round Fade">All Round Fade — $1,500</option>
+        <option value="kids-Taper Fade">Taper Fade — $1,500</option>
+        <option value="kids-One Level">One Level — $1,500</option>
+        <option value="kids-Bald Cut">Bald Cut — $1,500</option>
+        <option value="kids-Mohawk">Mohawk — $1,500</option>
+        <option value="kids-Flat Top">Flat Top — $1,500</option>
+        <option value="kids-Big Chop">Big Chop — $1,500</option>
+        <option value="kids-Buzz Cut">Buzz Cut — $1,500</option>
+        <option value="kids-School Boy Trim">School Boy Trim — $1,500</option>
       </select>
     </div>
 
@@ -1004,27 +1029,18 @@ const firebaseConfig = {
   const walkInDays = []; // No walk-in-only days — appointments accepted any day
 
   // ========== SERVICE DURATIONS ==========
-  const serviceDurations = {
-    "Celebrity Premium Cut": 45,
-    "Celebrity Regular Cut": 35,
-    "Teenage Premium Cut": 30,
-    "Teenage Regular Cut": 20,
-    "Kids Premium Cut": 30,
-    "Kids Regular Cut": 30,
-    "Kids Cut": 30,
-    "Beard Trim": 20,
-    "Beard Shape Up": 25,
-    "Full Beard Design": 35,
-    "Hot Towel Shave": 40,
-    "Cut & Beard": 60,
-    "Fade & Beard Design": 75,
-    "Hair Wash": 15,
-    "Scalp Treatment": 30,
-    "Kid Package": 30,
-    "Big Chop Transformation": 45,
-    "adult-custom": 35,
-    "teen-custom": 20
-  };
+  // All cuts use a 30–45 min default; duration is looked up by prefix
+  function getServiceDurationByKey(key) {
+    if (!key || key === 'NONE') return 30;
+    if (key.startsWith('adult-')) return 45;
+    if (key.startsWith('teen-')) return 35;
+    if (key.startsWith('kids-')) return 30;
+    return 30;
+  }
+
+  const serviceDurations = new Proxy({}, {
+    get(_, key) { return getServiceDurationByKey(key); }
+  });
 
   function getSelectedServices() {
     const haircut = document.getElementById('haircutType')?.value || "NONE";
@@ -1042,21 +1058,26 @@ const firebaseConfig = {
 
   function getSelectedServiceDuration() {
     const haircut = document.getElementById('haircutType').value;
-    return (haircut && haircut !== 'NONE' ? serviceDurations[haircut] : 0) || 30;
+    return getServiceDurationByKey(haircut);
   }
 
   function showEstimateTime() { /* duration display removed */ }
 
   // ========== ADDON PRICES ==========
   const addonPrices = {
-    'Custom Design': 200,
-    'Black Dye': 300,
+    'Line Up & Shave': 1500,
+    'Eyebrows Shave': 1000,
+    'Eyebrow Wax': 1500,
+    'Tint Eyebrows': 1000,
+    'Singles Eye Lash': 3500,
+    'Clusters': 4500,
+    'Strip': 2500,
+    'Custom Design': 500,
+    'Line Up': 500,
   };
 
   // Per-cut price overrides: used when a specific cut changes the base price
-  const cutPriceOverrides = {
-    'Kids Premium Cut': { 'Big Chop': 2500 }
-  };
+  const cutPriceOverrides = {};
 
   let selectedCutPrice = null; // price of the currently selected cut (if override exists)
 
@@ -1207,190 +1228,72 @@ const firebaseConfig = {
     return html;
   }
 
-  const pricingCardDefs = {
+  const pricingCardDefs = {};
 
-    "Celebrity Premium Cut": {
-      label: "Adult 18+ — Celebrity Premium Cut ($3,500)",
-      basePrice: 3500,
-      html: () => buildPricingCard('⭐ ADULT 18+ — MEN CELEBRITY PREMIUM CUT &nbsp;|&nbsp; $3,500 &nbsp;|&nbsp; 45 mins', [
-        { title: 'Cut of Choice (pick one):', items: [
-          {name:'All Round Fade',price:''},
-          {name:'Taper Fade',price:''},
-          {name:'One Level',price:''},
-          {name:'Bald Cut',price:''},
-          {name:'Mohawk',price:''},
-          {name:'Flat Top',price:''},
-          {name:'Big Chop',price:''},
-        ]},
-        { title: 'PLUS+ Add-ons Included (tap to confirm):', items: [
-          {name:'Eyebrows',price:'',isAddon:true},
-          {name:'Line Up',price:'',isAddon:true},
-          {name:'Head Dye',price:'',isAddon:true},
-          {name:'Beard Dye',price:'NO EXTRA COST',isAddon:true},
-          {name:'Warm Towel',price:'NO EXTRA COST',isAddon:true},
-        ]},
-        { title: 'Optional Extra:', items: [
-          {name:'Custom Design',price:'$200+',isAddon:true},
-        ]}
-      ])
-    },
+  // ---- ADULT cuts ($2,500 base) with grooming/lash add-ons ----
+  (function() {
+    const adultCuts = ['All Round Fade','Taper Fade','One Level','Bald Cut','Mohawk','Flat Top','Big Chop','Buzz Cut','Low Fade','Skin Fade','Ladies Cut'];
+    const adultAddons = [
+      {name:'Line Up & Shave',price:'$1,500'},
+      {name:'Eyebrows Shave',price:'$1,000'},
+      {name:'Eyebrow Wax',price:'$1,500'},
+      {name:'Tint Eyebrows',price:'$1,000'},
+      {name:'Singles Eye Lash',price:'$3,500'},
+      {name:'Clusters',price:'$4,500'},
+      {name:'Strip',price:'$2,500'},
+      {name:'Custom Design',price:'$500+'},
+    ];
+    adultCuts.forEach(cut => {
+      pricingCardDefs['adult-' + cut] = {
+        label: 'Adult 18+ — ' + cut + ' ($2,500)',
+        basePrice: 2500,
+        html: () => buildPricingCard('💈 ADULT 18+ — ' + cut.toUpperCase() + ' &nbsp;|&nbsp; $2,500', [
+          { title: 'Add-Ons (pick any):', items: adultAddons.map(a => ({...a, isAddon:true})) }
+        ])
+      };
+    });
+  })();
 
-    "Celebrity Regular Cut": {
-      label: "Adult 18+ — Celebrity Regular Cut ($3,000)",
-      basePrice: 3000,
-      html: () => buildPricingCard('✂ ADULT 18+ — MEN CELEBRITY REGULAR CUT &nbsp;|&nbsp; $3,000 &nbsp;|&nbsp; 35 mins', [
-        { title: 'Cut of Choice (pick one):', items: [
-          {name:'All Round Fade',price:''},
-          {name:'Taper Fade',price:''},
-          {name:'One Level',price:''},
-          {name:'Bald Cut',price:''},
-          {name:'Mohawk',price:''},
-          {name:'Flat Top',price:''},
-        ]},
-        { title: 'PLUS+ Add-on Included (tap to confirm):', items: [
-          {name:'Black Dye',price:'',isAddon:true},
-        ]}
-      ])
-    },
+  // ---- TEEN cuts ($2,000 base) with grooming/lash add-ons ----
+  (function() {
+    const teenCuts = ['All Round Fade','Taper Fade','One Level','Bald Cut','Mohawk','Flat Top','Big Chop','Buzz Cut','Low Fade','Skin Fade','Ladies Cut'];
+    const teenAddons = [
+      {name:'Eyebrows Shave',price:'$1,000'},
+      {name:'Eyebrow Wax',price:'$1,500'},
+      {name:'Tint Eyebrows',price:'$1,000'},
+      {name:'Singles Eye Lash',price:'$3,500'},
+      {name:'Clusters',price:'$4,500'},
+      {name:'Strip',price:'$2,500'},
+      {name:'Custom Design',price:'$500+'},
+    ];
+    teenCuts.forEach(cut => {
+      pricingCardDefs['teen-' + cut] = {
+        label: 'Teen 13–17 — ' + cut + ' ($2,000)',
+        basePrice: 2000,
+        html: () => buildPricingCard('✂ TEEN 13–17 — ' + cut.toUpperCase() + ' &nbsp;|&nbsp; $2,000', [
+          { title: 'Add-Ons (pick any):', items: teenAddons.map(a => ({...a, isAddon:true})) }
+        ])
+      };
+    });
+  })();
 
-    "adult-custom": {
-      label: "Adult 18+ — Build Your Own Cut",
-      html: () => buildPricingCard('✂ ADULT 18+ — APPOINTMENT PRICE LIST', [
-        { title: 'Cuts (pick one):', items: [
-          {name:'All Round Fade',price:'$2,000'},
-          {name:'Taper Fade',price:'$2,000'},
-          {name:'One Level',price:'$2,000'},
-          {name:'Bald Cut',price:'$2,000'},
-          {name:'Mohawk',price:'$2,000'},
-          {name:'Flat Top',price:'$2,000'},
-        ]},
-        { title: 'Add-Ons (pick any):', items: [
-          {name:'Line Up',price:'$1,000',isAddon:true},
-          {name:'Custom Design',price:'$200+',isAddon:true},
-          {name:'Black Dye',price:'$300',isAddon:true},
-          {name:'Eyebrows',price:'$500',isAddon:true},
-        ]}
-      ])
-    },
-
-    "Teenage Premium Cut": {
-      label: "Teen 13–17 — Celebrity Premium Cut ($2,500)",
-      basePrice: 2500,
-      html: () => buildPricingCard('⭐ TEEN 13–17 — MEN CELEBRITY PREMIUM CUT &nbsp;|&nbsp; $2,500 &nbsp;|&nbsp; 30 mins', [
-        { title: 'Cut of Choice (pick one):', items: [
-          {name:'All Round Fade',price:''},
-          {name:'Taper Fade',price:''},
-          {name:'One Level',price:''},
-          {name:'Bald Cut',price:''},
-          {name:'Mohawk',price:''},
-          {name:'Flat Top',price:''},
-          {name:'Big Chop',price:''},
-        ]},
-        { title: 'PLUS+ Add-ons Included (tap to confirm):', items: [
-          {name:'Eyebrows',price:'',isAddon:true},
-          {name:'Line Up',price:'',isAddon:true},
-          {name:'Head Dye',price:'',isAddon:true},
-          {name:'Beard Dye',price:'NO EXTRA COST',isAddon:true},
-          {name:'Warm Towel',price:'NO EXTRA COST',isAddon:true},
-        ]},
-        { title: 'Optional Extra:', items: [
-          {name:'Custom Design',price:'$200+',isAddon:true},
-        ]}
-      ])
-    },
-
-    "Teenage Regular Cut": {
-      label: "Teen 13–17 — Celebrity Regular Cut ($2,000)",
-      basePrice: 2000,
-      html: () => buildPricingCard('✂ TEEN 13–17 — MEN CELEBRITY REGULAR CUT &nbsp;|&nbsp; $2,000 &nbsp;|&nbsp; 20 mins', [
-        { title: 'Cut of Choice (pick one):', items: [
-          {name:'All Round Fade',price:''},
-          {name:'Taper Fade',price:''},
-          {name:'One Level',price:''},
-          {name:'Bald Cut',price:''},
-          {name:'Mohawk',price:''},
-          {name:'Flat Top',price:''},
-        ]},
-        { title: 'PLUS+ Add-on Included (tap to confirm):', items: [
-          {name:'Black Dye',price:'',isAddon:true},
-        ]}
-      ])
-    },
-
-    "teen-custom": {
-      label: "Teen 13–17 — Build Your Own Cut",
-      html: () => buildPricingCard('✂ TEEN 13–17 — APPOINTMENT PRICE LIST', [
-        { title: 'Cuts (pick one):', items: [
-          {name:'All Round Fade',price:'$1,500'},
-          {name:'Taper Fade',price:'$1,500'},
-          {name:'One Level',price:'$1,500'},
-          {name:'Bald Cut',price:'$1,500'},
-          {name:'Mohawk',price:'$1,500'},
-          {name:'Flat Top',price:'$1,500'},
-        ]},
-        { title: 'Add-Ons (pick any):', items: [
-          {name:'Line Up',price:'$500',isAddon:true},
-          {name:'Custom Design',price:'$200+',isAddon:true},
-          {name:'Black Dye',price:'$300',isAddon:true},
-          {name:'Eyebrows',price:'$500',isAddon:true},
-        ]}
-      ])
-    },
-
-    "Kids Premium Cut": {
-      label: "Kids 3–12 — Celebrity Premium Cut ($2,000)",
-      basePrice: 2000,
-      html: () => buildPricingCard('⭐ KIDS 3–12 — CELEBRITY PREMIUM CUT &nbsp;|&nbsp; 30 mins', [
-        { title: 'Cut of Choice (pick one):', items: [
-          {name:'All Round Fade',price:'$2,000'},
-          {name:'Taper Fade',price:'$2,000'},
-          {name:'One Level',price:'$2,000'},
-          {name:'Bald Cut',price:'$2,000'},
-          {name:'Mohawk',price:'$2,000'},
-          {name:'Flat Top',price:'$2,000'},
-          {name:'Big Chop',price:'$2,500'},
-        ]},
-        { title: 'Optional Add-On:', items: [
-          {name:'Custom Design',price:'$200+',isAddon:true},
-          {name:'Black Dye',price:'$300',isAddon:true},
-        ]}
-      ])
-    },
-
-    "Kids Regular Cut": {
-      label: "Kids 3–12 — Celebrity Regular Cut ($1,500)",
-      basePrice: 1500,
-      html: () => buildPricingCard('✂ KIDS 3–12 — CELEBRITY REGULAR CUT &nbsp;|&nbsp; 30 mins', [
-        { title: 'Cut of Choice (pick one):', items: [
-          {name:'All Round Fade',price:'$1,500'},
-          {name:'Taper Fade',price:'$1,500'},
-          {name:'One Level',price:'$1,500'},
-          {name:'Bald Cut',price:'$1,500'},
-          {name:'Mohawk',price:'$1,500'},
-          {name:'Flat Top',price:'$1,500'},
-        ]}
-      ])
-    },
-
-    "Kids Cut": {
-      label: "Kids 3–12 — Cut",
-      html: () => buildPricingCard('✂ KIDS 3–12 — APPOINTMENT PRICE LIST &nbsp;|&nbsp; 30 mins', [
-        { title: 'Cuts (pick one):', items: [
-          {name:'All Round Fade',price:'$2,000'},
-          {name:'Taper Fade',price:'$2,000'},
-          {name:'One Level',price:'$2,000'},
-          {name:'Bald Cut',price:'$2,000'},
-          {name:'Mohawk',price:'$2,000'},
-          {name:'Flat Top',price:'$2,000'},
-          {name:'Big Chop',price:'$2,500'},
-        ]},
-        { title: 'Add-Ons (pick any):', items: [
-          {name:'Custom Design',price:'$200+',isAddon:true},
-          {name:'Black Dye',price:'$300',isAddon:true},
-        ]}
-      ])
-    }
-  };
+  // ---- KIDS cuts ($1,500 base) with optional extras ----
+  (function() {
+    const kidsCuts = ['All Round Fade','Taper Fade','One Level','Bald Cut','Mohawk','Flat Top','Big Chop','Buzz Cut','School Boy Trim'];
+    const kidsAddons = [
+      {name:'Line Up',price:'$500+'},
+      {name:'Custom Design',price:'$500+'},
+    ];
+    kidsCuts.forEach(cut => {
+      pricingCardDefs['kids-' + cut] = {
+        label: 'Kids — ' + cut + ' ($1,500)',
+        basePrice: 1500,
+        html: () => buildPricingCard('👦 KIDS — ' + cut.toUpperCase() + ' &nbsp;|&nbsp; $1,500', [
+          { title: 'Optional Extra (pick any):', items: kidsAddons.map(a => ({...a, isAddon:true})) }
+        ])
+      };
+    });
+  })();
 
   // Compatibility shim — old code referenced pricingCards
   const pricingCards = {};
