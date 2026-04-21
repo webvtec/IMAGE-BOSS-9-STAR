@@ -1029,11 +1029,11 @@ const firebaseConfig = {
   const walkInDays = []; // No walk-in-only days — appointments accepted any day
 
   // ========== SERVICE DURATIONS ==========
-  // All cuts use a 30–45 min default; duration is looked up by prefix
+  // All cuts use a 30 min default; duration is looked up by prefix
   function getServiceDurationByKey(key) {
     if (!key || key === 'NONE') return 30;
-    if (key.startsWith('adult-')) return 45;
-    if (key.startsWith('teen-')) return 35;
+    if (key.startsWith('adult-')) return 30;
+    if (key.startsWith('teen-')) return 30;
     if (key.startsWith('kids-')) return 30;
     return 30;
   }
