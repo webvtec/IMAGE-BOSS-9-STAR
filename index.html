@@ -604,6 +604,7 @@
         <option value="adult-Low Fade">Low Fade — $2,500</option>
         <option value="adult-Skin Fade">Skin Fade — $2,500</option>
         <option value="adult-Ladies Cut">Ladies Cut — $2,500</option>
+        <option value="adult-Other">Other — $0</option>
       </select>
     </div>
 
@@ -623,6 +624,7 @@
         <option value="teen-Low Fade">Low Fade — $2,000</option>
         <option value="teen-Skin Fade">Skin Fade — $2,000</option>
         <option value="teen-Ladies Cut">Ladies Cut — $2,000</option>
+        <option value="teen-Other">Other — $0</option>
       </select>
     </div>
 
@@ -640,6 +642,7 @@
         <option value="kids-Big Chop">Big Chop — $1,500</option>
         <option value="kids-Buzz Cut">Buzz Cut — $1,500</option>
         <option value="kids-School Boy Trim">School Boy Trim — $1,500</option>
+        <option value="kids-Other">Other — $0</option>
       </select>
     </div>
 
@@ -1043,8 +1046,12 @@ const firebaseConfig = {
     if (!haircut || haircut === 'NONE') return 'No services selected';
 
     const def = pricingCardDefs[haircut];
-    const packageLabel = def ? def.label : haircut;
+    const isOther = def && def.isOther;
 
+    // For "Other", require at least one add-on; otherwise require a cut item
+    if (!isOther && !selectedCutItem && selectedAddons.size === 0) return 'No services selected';
+
+    const packageLabel = def ? def.label : haircut;
     const parts = [packageLabel];
     if (selectedCutItem) parts.push('Cut: ' + selectedCutItem);
     selectedAddons.forEach(a => parts.push('Add-on: ' + a));
@@ -1211,7 +1218,7 @@ const firebaseConfig = {
 
   function buildPricingCard(headerHTML, sections, basePrice) {
     // sections = [{title, items:[{name,price,isAddon}], isMutex}]
-    const priceTag = basePrice ? `<div style="margin:10px 0 6px;text-align:center;"><span style="display:inline-block;background:var(--accent);color:#1a1a1a;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;padding:6px 22px;border-radius:6px;">CUT PRICE: $${Number(basePrice).toLocaleString()}</span></div>` : '';
+    const priceTag = basePrice ? `<div style="margin:10px 0 6px;text-align:center;"><span style="display:inline-block;background:var(--accent);color:#1a1a1a;font-family:'Bebas Neue',cursive;font-size:22px;letter-spacing:2px;padding:6px 22px;border-radius:6px;">CUT PRICE: $${Number(basePrice).toLocaleString()}</span></div>` : '<div style="margin:6px 0 4px;text-align:center;font-family:\'Bebas Neue\',cursive;font-size:13px;letter-spacing:1px;color:#aaa;">Choose your add-ons below — no base cut charge</div>';
     let html = `<div style="background:var(--accent);padding:10px 14px;">
       <span style="font-family:'Bebas Neue',cursive;letter-spacing:2px;font-size:14px;color:#1a1a1a;">${headerHTML}</span>
     </div>
@@ -1251,6 +1258,15 @@ const firebaseConfig = {
         ], 2500)
       };
     });
+    // Adult Other — $0, add-ons only
+    pricingCardDefs['adult-Other'] = {
+      label: 'Adult 18+ — Other',
+      basePrice: 0,
+      isOther: true,
+      html: () => buildPricingCard('💈 ADULT 18+ — OTHER', [
+        { title: 'Add-Ons (pick any):', items: adultAddons.map(a => ({...a, isAddon:true})) }
+      ], 0)
+    };
   })();
 
   // ---- TEEN cuts ($2,000 base) with grooming/lash add-ons ----
@@ -1275,6 +1291,15 @@ const firebaseConfig = {
         ], 2000)
       };
     });
+    // Teen Other — $0, add-ons only
+    pricingCardDefs['teen-Other'] = {
+      label: 'Teen 13–17 — Other',
+      basePrice: 0,
+      isOther: true,
+      html: () => buildPricingCard('✂ TEEN 13–17 — OTHER', [
+        { title: 'Add-Ons (pick any):', items: teenAddons.map(a => ({...a, isAddon:true})) }
+      ], 0)
+    };
   })();
 
   // ---- KIDS cuts ($1,500 base) with optional extras ----
@@ -1293,6 +1318,15 @@ const firebaseConfig = {
         ], 1500)
       };
     });
+    // Kids Other — $0, add-ons only
+    pricingCardDefs['kids-Other'] = {
+      label: 'Kids — Other',
+      basePrice: 0,
+      isOther: true,
+      html: () => buildPricingCard('👦 KIDS — OTHER', [
+        { title: 'Optional Extra (pick any):', items: kidsAddons.map(a => ({...a, isAddon:true})) }
+      ], 0)
+    };
   })();
 
   // Compatibility shim — old code referenced pricingCards
@@ -1578,7 +1612,9 @@ const firebaseConfig = {
       return;
     }
 
-    if (!selectedCutItem) {
+    const haircutVal = document.getElementById('haircutType')?.value || 'NONE';
+    const isOtherCut = haircutVal.endsWith('-Other');
+    if (!selectedCutItem && !isOtherCut) {
       alert('Please select your Cut of Choice before booking.');
       return;
     }
