@@ -1029,12 +1029,8 @@ const firebaseConfig = {
   const walkInDays = []; // No walk-in-only days — appointments accepted any day
 
   // ========== SERVICE DURATIONS ==========
-  // All cuts use a 30 min default; duration is looked up by prefix
+  // All cuts use a 30–45 min default; duration is looked up by prefix
   function getServiceDurationByKey(key) {
-    if (!key || key === 'NONE') return 30;
-    if (key.startsWith('adult-')) return 30;
-    if (key.startsWith('teen-')) return 30;
-    if (key.startsWith('kids-')) return 30;
     return 30;
   }
 
@@ -1420,15 +1416,15 @@ const firebaseConfig = {
     try {
       const SLOT_INTERVAL = 30; // fixed 30-minute slot intervals
       const snapshot = await db.collection("bookings").where("date", "==", date).get();
-      const bookings = snapshot.docs.map(doc => {
-        const bookedTime = convertToMinutes(normalizeTimeStr(doc.data().time));
-        return { start: bookedTime, end: bookedTime + SLOT_INTERVAL };
-      });
+      const bookings = snapshot.docs
+        .filter(doc => doc.data().status !== 'Cancelled')
+        .map(doc => {
+          const bookedTime = convertToMinutes(normalizeTimeStr(doc.data().time));
+          return { start: bookedTime, end: bookedTime + 30 };
+        });
 
       const unavailableSnapshot = await db.collection("unavailableDays").where("date", "==", date).get();
       let unavailableRanges = [];
-      // 1:30 PM – 3:00 PM is always blocked (break every day)
-      unavailableRanges.push({ start: 13 * 60 + 30, end: 15 * 60 }); // 810 – 900 minutes
       unavailableSnapshot.forEach(doc => {
         const data = doc.data();
         if (data.allDay) {
@@ -1537,11 +1533,12 @@ const firebaseConfig = {
 
         return db.collection('bookings').where('date', '==', date).get()
           .then((querySnapshot) => {
-            const SLOT_INTERVAL = 30;
-            const newServiceEndTime = selectedMinutes + SLOT_INTERVAL;
+            const newServiceEndTime = selectedMinutes + 30;
 
             for (let doc of querySnapshot.docs) {
-              let bookedTime = doc.data().time.trim().replace(/\s+/g, ' ');
+              const data = doc.data();
+              if (data.status === 'Cancelled') continue;
+              let bookedTime = data.time.trim().replace(/\s+/g, ' ');
               let bookedMinutes = convertToMinutes(bookedTime);
               let bookedEndTime = bookedMinutes + 30;
 
